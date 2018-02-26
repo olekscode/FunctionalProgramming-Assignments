@@ -4,19 +4,49 @@ def contains(s: Set, x: Int): Boolean = s(x)
 
 // Functions for printing infinite sets
 
-def printFirst(s: Set, size: Int) = {
+def allInRange(s: Set, lo: Int, hi: Int): List[Int] = {
   var elements = List[Int]()
-  var x = 0
 
-  while (elements.length < size && x < 1000) {
+  for (x <- lo to hi)
     if (contains(s, x))
       elements = elements :+ x
 
-    x += 1
+  elements
+}
+
+def allPositive(s: Set) = allInRange(s, 1, 1000)
+def allNegative(s: Set) = allInRange(s, -1000, -1)
+
+def printFirst(s: Set, size: Int) = {
+  val pos = allPositive(s)
+  val neg = allNegative(s)
+  val isZero = contains(s, 0)
+
+  var numOfPos = size / 2
+  var ending = " ...}"
+
+  if (pos.length <= size / 2) {
+    numOfPos = pos.length
+    ending = "}"
   }
 
-  val ending = if (x == 1000) "}" else ", ... }"
-  println(elements.mkString("{", ", ", ending))
+  val numZero = if (isZero) 1 else 0
+  val rest = size - (numOfPos + numZero)
+
+  var numOfNeg = rest
+  var beginning = "{... "
+
+  if (neg.length <= rest) {
+    numOfNeg = neg.length
+    numOfPos += rest - numOfNeg
+    beginning = "{"
+  }
+
+  var elements = neg.takeRight(numOfNeg)
+  if (isZero) elements = elements ::: List(0)
+  elements = elements ::: pos.take(numOfPos)
+
+  println(elements.mkString(beginning, ", ", ending))
 }
 
 def printSet(s: Set) = printFirst(s, 10)
@@ -41,22 +71,25 @@ def odd = (x: Int) => x % 2 != 0
 def mult3 = (x: Int) => x % 3 == 0
 
 printSet(even)
-// {0, 2, 4, 6, 8, 10, 12, 14, 16, 18, ... }
+// {... -8, -6, -4, -2, 0, 2, 4, 6, 8, 10 ...}
 
 printSet(odd)
-// {1, 3, 5, 7, 9, 11, 13, 15, 17, 19, ... }
+// {... -9, -7, -5, -3, -1, 1, 3, 5, 7, 9 ...}
+
+printSet(mult3)
+// {... -12, -9, -6, -3, 0, 3, 6, 9, 12, 15 ...}
 
 printSet(union(even, odd))
-// {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ... }
+// {... -4, -3, -2, -1, 0, 1, 2, 3, 4, 5 ...}
 
 printSet(intersect(even, mult3))
-// {0, 6, 12, 18, 24, 30, 36, 42, 48, 54, ... }
+// {... -24, -18, -12, -6, 0, 6, 12, 18, 24, 30 ...}
 
 printSet(diff(even, mult3))
-// {2, 4, 8, 10, 14, 16, 20, 22, 26, 28, ... }
+// {... -14, -10, -8, -4, -2, 2, 4, 8, 10, 14 ...}
 
 printSet(filter(odd, (x: Int) => x % 5 == 0))
-// {5, 15, 25, 35, 45, 55, 65, 75, 85, 95, ... }
+// {... -45, -35, -25, -15, -5, 5, 15, 25, 35, 45 ...}
 
 printSet(filter(odd, even))
 // {}
@@ -86,17 +119,26 @@ def map(s: Set, f: Int => Int): Set =
   (y: Int) => exists(s, (x: Int) => f(x) == y)
 
 def zero = (x: Int) => x == 0
-def natural = diff(union(odd, even), zero)
+def positive = (x: Int) => x > 0
+def negative = (x: Int) => x < 0
+
+def natural = union(positive, zero)
 def squares = map(natural, (x: Int) => x * x)
 
 printSet(zero)
 // {0}
 
+printSet(positive)
+// {1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ...}
+
+printSet(negative)
+// {... -10, -9, -8, -7, -6, -5, -4, -3, -2, -1}
+
 printSet(natural)
-// {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... }
+// {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ...}
 
 printSet(squares)
-// {1, 4, 9, 16, 25, 36, 49, 64, 81, 100, ... }
+// {0, 1, 4, 9, 16, 25, 36, 49, 64, 81 ...}
 
 def fiveInt = (x: Int) => x >= 0 && x <= 5
 
