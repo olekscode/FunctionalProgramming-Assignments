@@ -89,6 +89,9 @@ def zero = (x: Int) => x == 0
 def natural = diff(union(odd, even), zero)
 def squares = map(natural, (x: Int) => x * x)
 
+printSet(zero)
+// {0}
+
 printSet(natural)
 // {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ... }
 
